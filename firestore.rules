@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: leads
+    // Document ID: auto-generated
+    // Fields:
+    //   - email: string (required) - The email address of the lead
+    //   - createdAt: timestamp (required) - When the lead was created
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "chenliuxi0519@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['email', 'createdAt']) &&
+             data.email is string &&
+             data.email.size() > 0 &&
+             data.email.size() < 255 &&
+             data.createdAt is timestamp;
+    }
+
+    match /leads/{leadId} {
+      // Allow anyone to create a lead (submit the form)
+      allow create: if isValidLead(request.resource.data);
+      
+      // Only admins can read the leads
+      allow read: if isAdmin();
+      
+      // No updates or deletes for now
+      allow update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+  }
+}

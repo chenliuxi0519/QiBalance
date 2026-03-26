@@ -1,0 +1,7 @@
+{
+  "name": "Remix: 炁 Qì - TCM Wellness Betting",
+  "description": "A structured, data-supported TCM wellness management system using behavioral economics to build long-term health habits.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

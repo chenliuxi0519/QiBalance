@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'motion/react';
 import {
   Heart,
@@ -63,6 +63,7 @@ import preferEN from './assets/PreferEN.mov';
 import planEN from './assets/PlanEN.mov';
 import checkEN from './assets/CheckEN.mov';
 import aiEN from './assets/AIEN.mov';
+
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -500,6 +501,29 @@ const useTranslation = () => {
   return context;
 };
 
+// const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+//   const { t, incrementReward } = useTranslation();
+//   const [contactInfo, setContactInfo] = useState('');
+//   const [isSubmitted, setIsSubmitted] = useState(false);
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (contactInfo && !isSubmitting) {
+//       setIsSubmitting(true);
+//       try {
+//         await saveLead(contactInfo);
+//         setIsSubmitted(true);
+//         incrementReward();
+//       } catch (error) {
+//         alert('Failed to join waitlist. Please try again.');
+//       } finally {
+//         setIsSubmitting(false);
+//       }
+//     }
+//   };
+
 const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { t, incrementReward } = useTranslation();
   const [contactInfo, setContactInfo] = useState('');
@@ -522,6 +546,14 @@ const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     }
   };
 
+  // 在 onClose 触发时，派发自定义事件
+  const handleClose = () => {
+    onClose();
+    document.dispatchEvent(new CustomEvent('waitlistModalClose'));  // 触发事件
+  };
+
+  
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -530,7 +562,7 @@ const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute inset-0 bg-sage-900/60 backdrop-blur-sm"
           />
           <motion.div
@@ -540,7 +572,7 @@ const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
             className="relative bg-warm-50 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
           >
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="absolute top-6 right-6 p-2 rounded-full hover:bg-sage-100 transition-colors text-sage-400 hover:text-sage-600"
             >
               <X size={24} />
@@ -888,8 +920,8 @@ const BettingModel = () => {
   return (
     <section id="betting" className="py-20 bg-sage-900 text-warm-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="text-center max-w-4xl mx-auto mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif font-medium mb-6 whitespace-nowrap">
+        <div className="text-center max-w-6xl mx-auto mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif font-medium mb-6 w-full md:w-auto">
             {t.betting.title}
           </h2>
           <p className="text-lg opacity-80 leading-relaxed mb-4">
@@ -919,7 +951,7 @@ const BettingModel = () => {
         </div>
 
         {/* Cashback Milestones */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {t.betting.milestones.map((milestone, i) => (
             <motion.div
               key={i}
@@ -927,7 +959,7 @@ const BettingModel = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white/5 border border-white/10 p-8 rounded-[2rem] text-center backdrop-blur-sm hover:bg-white/10 transition-colors group"
+              className="bg-white/5 border border-white/10 p-4 rounded-[2rem] text-center backdrop-blur-sm hover:bg-white/10 transition-colors group"
             >
               <div className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-3 opacity-80 group-hover:opacity-100 transition-opacity">{milestone.days}</div>
               <div className="text-3xl font-serif font-bold mb-2 tracking-tighter">{milestone.reward}</div>
@@ -1153,7 +1185,7 @@ const HowItWorks = () => {
           </motion.div>
         </div>
 
-        <div className="text-center">
+        {/* <div className="text-center">
           <div className="inline-flex items-center gap-4 text-sage-500 font-serif italic text-xl md:text-2xl">
             <span>{t.howItWorks.conclusion.split(' → ')[0]}</span>
             <ArrowRight size={20} className="text-sage-300" />
@@ -1161,7 +1193,16 @@ const HowItWorks = () => {
             <ArrowRight size={20} className="text-sage-300" />
             <span className="text-sage-800 font-bold">{t.howItWorks.conclusion.split(' → ')[2]}</span>
           </div>
-        </div>
+        </div> */}
+        <div className="text-center">
+  <div className="inline-flex flex-wrap items-center gap-2 md:gap-4 text-sage-500 font-serif italic text-base md:text-xl lg:text-2xl">
+    <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[0]}</span>
+    <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
+    <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[1]}</span>
+    <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
+    <span className="text-sage-800 font-bold w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[2]}</span>
+  </div>
+</div>
       </div>
     </section>
   );
@@ -1436,8 +1477,15 @@ const Footer = () => {
   );
 };
 
+
 const FloatingRewardPool = () => {
   const { rewardAmount, lang, openWaitlist } = useTranslation();
+  const isDragging = useRef(false);
+
+  const handleClick = () => {
+    if (isDragging.current) return;
+    openWaitlist();
+  };
 
   return (
     <motion.div
@@ -1446,8 +1494,10 @@ const FloatingRewardPool = () => {
       drag
       dragConstraints={{ left: -window.innerWidth + 300, right: 0, top: 0, bottom: window.innerHeight - 200 }}
       whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
+      onDragStart={() => { isDragging.current = true; }}
+      onDragEnd={() => { setTimeout(() => { isDragging.current = false; }, 0); }}
       className="fixed top-24 right-6 z-[60] group cursor-pointer"
-      onClick={openWaitlist}
+      onClick={handleClick}
     >
       {/* Background Glow Pulse */}
       <div className="absolute inset-0 bg-amber-400/10 blur-3xl rounded-full animate-pulse group-hover:bg-amber-400/20 transition-colors" />
@@ -1504,6 +1554,7 @@ const FloatingRewardPool = () => {
     </motion.div>
   );
 };
+
 
 const PlateDivider = ({ startIndex = 0 }: { startIndex?: number }) => {
   const { lang, flippedStates, handleFlip } = useContext(LanguageContext)!;
@@ -1583,23 +1634,32 @@ const HealthSidebar = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="fixed right-4 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col items-center gap-2 bg-white/95 backdrop-blur-md p-2.5 rounded-full border border-sage-100 shadow-2xl"
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      style={{
+        bottom: 'max(16px, env(safe-area-inset-bottom))',
+        right: 'max(16px, env(safe-area-inset-right))'
+      }}
+      className="fixed z-50 flex flex-col items-center gap-2 rounded-full border border-sage-100 bg-white/95 p-2 shadow-2xl backdrop-blur-md sm:p-2.5"
     >
       <div className="flex flex-col items-center gap-1">
         <motion.div
           animate={{
-            scale: healthPercentage > 0 ? [1, 1.2, 1] : 1,
-            rotate: healthPercentage > 0 ? [0, 10, -10, 0] : 0
+            scale: healthPercentage > 0 ? [1, 1.15, 1] : 1,
+            rotate: healthPercentage > 0 ? [0, 8, -8, 0] : 0
           }}
           transition={{ duration: 0.5 }}
         >
-          <Leaf size={14} className={cn("transition-colors duration-500", healthPercentage > 0 ? "text-emerald-600" : "text-sage-300")} />
+          <Leaf
+            size={14}
+            className={cn(
+              "transition-colors duration-500 sm:size-4",
+              healthPercentage > 0 ? "text-emerald-600" : "text-sage-300"
+            )}
+          />
         </motion.div>
 
-        <div className="relative h-32 w-3 bg-sage-100 rounded-full overflow-hidden border border-sage-200 shadow-inner">
-          {/* Subtle Glow Background */}
+        <div className="relative h-24 w-3 overflow-hidden rounded-full border border-sage-200 bg-sage-100 shadow-inner sm:h-32">
           {healthPercentage > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -1610,40 +1670,44 @@ const HealthSidebar = () => {
           <motion.div
             initial={{ height: 0 }}
             animate={{ height: `${healthPercentage}%` }}
-            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-emerald-600 to-emerald-400 z-10"
             transition={{ type: "spring", stiffness: 100, damping: 15 }}
+            className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-emerald-600 to-emerald-400"
           />
         </div>
       </div>
 
       <div className="flex flex-col items-center">
-        <span className={cn(
-          "text-[8px] font-bold text-sage-400 uppercase tracking-widest mb-1",
-          lang === 'zh' ? "[writing-mode:vertical-rl]" : "[writing-mode:vertical-lr] rotate-180"
-        )}>
-          {lang === 'zh' ? '健康值' : 'Health'}
+        <span
+          className={cn(
+            "mb-1 text-[7px] font-bold uppercase tracking-widest text-sage-400 sm:text-[8px]",
+            lang === "zh"
+              ? "[writing-mode:vertical-rl]"
+              : "[writing-mode:vertical-lr] rotate-180"
+          )}
+        >
+          {lang === "zh" ? "健康值" : "Health"}
         </span>
-        <div className="flex flex-col items-center mb-2">
+
+        <div className="mb-2 flex flex-col items-center">
           <motion.span
             key={flippedCount}
             initial={{ scale: 1.2, color: "#10b981" }}
             animate={{ scale: 1, color: "#1c1c1c" }}
-            className="text-base font-serif font-bold tabular-nums leading-none"
+            className="text-sm font-serif font-bold leading-none tabular-nums sm:text-base"
           >
             {Math.round(healthPercentage)}
           </motion.span>
-          <span className="text-[8px] font-bold text-sage-400">%</span>
+          <span className="text-[7px] font-bold text-sage-400 sm:text-[8px]">%</span>
         </div>
 
-        {/* Reset Button moved here */}
         <motion.button
           onClick={resetPlates}
           whileHover={{ rotate: -180, scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="p-1.5 rounded-full bg-sage-100 text-sage-500 hover:bg-sage-200 hover:text-sage-700 transition-colors shadow-sm"
+          className="rounded-full bg-sage-100 p-1.5 text-sage-500 shadow-sm transition-colors hover:bg-sage-200 hover:text-sage-700"
           title="Reset"
         >
-          <RotateCcw size={14} />
+          <RotateCcw size={13} className="sm:size-[14px]" />
         </motion.button>
       </div>
     </motion.div>

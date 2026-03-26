@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Analytics } from '@vercel/analytics/react';
 import {
   saveLead,
   signIn,
@@ -1796,6 +1797,7 @@ export default function App() {
         <WaitlistModal isOpen={isWaitlistOpen} onClose={() => setIsWaitlistOpen(false)} />
         <FloatingRewardPool />
         <HealthSidebar />
+        <Analytics />
       </div>
     </LanguageContext.Provider>
   );

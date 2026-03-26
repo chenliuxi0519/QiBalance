@@ -63,6 +63,7 @@ import preferEN from './assets/PreferEN.mov';
 import planEN from './assets/PlanEN.mov';
 import checkEN from './assets/CheckEN.mov';
 import aiEN from './assets/AIEN.mov';
+import { trackEvent } from './analytics';
 
 
 function cn(...inputs: ClassValue[]) {
@@ -507,7 +508,7 @@ const useTranslation = () => {
 //   const [isSubmitted, setIsSubmitted] = useState(false);
 //   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  
+
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
 //     if (contactInfo && !isSubmitting) {
@@ -552,7 +553,7 @@ const WaitlistModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
     document.dispatchEvent(new CustomEvent('waitlistModalClose'));  // 触发事件
   };
 
-  
+
 
   return (
     <AnimatePresence>
@@ -680,7 +681,8 @@ const Navbar = () => {
             <span className="text-xs font-bold uppercase tracking-widest">{lang === 'en' ? '中文' : 'EN'}</span>
           </button>
           <button
-            onClick={openWaitlist}
+            // onClick={openWaitlist}
+            onClick={() => { trackEvent('cta_click', { source: 'navbar' }); openWaitlist(); }}
             className="bg-sage-600 text-warm-50 px-6 py-2.5 rounded-full text-sm font-medium hover:bg-sage-700 transition-all shadow-sm hover:shadow-md"
           >
             {t.nav.startTrial}
@@ -735,7 +737,8 @@ const Hero = () => {
             </p>
             <div className="flex flex-col gap-6">
               <button
-                onClick={openWaitlist}
+                // onClick={openWaitlist}
+                onClick={() => { trackEvent('cta_click', { source: 'hero' }); openWaitlist(); }}
                 className="bg-sage-600 text-warm-50 px-12 py-5 rounded-full text-xl font-medium hover:bg-sage-700 transition-all shadow-[0_20px_50px_rgba(90,117,90,0.3)] hover:shadow-[0_20px_60px_rgba(90,117,90,0.4)] flex items-center justify-center gap-3 w-fit group"
               >
                 {t.hero.ctaPrimary}
@@ -1165,23 +1168,31 @@ const HowItWorks = () => {
 
         <div className="relative mb-12 cursor-grab active:cursor-grabbing" onWheel={handleWheel}>
           {/* Draggable Container */}
-          <motion.div
+          {/* <motion.div
             ref={scrollRef}
             style={{ x }}
             drag="x"
             dragConstraints={dragConstraints}
             className="flex gap-6 pb-12 no-scrollbar"
+          > */}
+          <motion.div
+            ref={scrollRef}
+            style={{ x }}
+            drag="x"
+            dragConstraints={dragConstraints}
+            onDragEnd={() => trackEvent('video_section_drag')}   // ← 加这行
+            className="flex gap-6 pb-12 no-scrollbar"
           >
             {t.howItWorks.steps.map((step, i) => (
-  <VideoCard
-    key={i}
-    step={step}
-    index={i}
-    hoveredIndex={hoveredIndex}
-    setHoveredIndex={setHoveredIndex}
-    videoSrc={stepVideos[i]}
-  />
-))}
+              <VideoCard
+                key={i}
+                step={step}
+                index={i}
+                hoveredIndex={hoveredIndex}
+                setHoveredIndex={setHoveredIndex}
+                videoSrc={stepVideos[i]}
+              />
+            ))}
           </motion.div>
         </div>
 
@@ -1195,14 +1206,14 @@ const HowItWorks = () => {
           </div>
         </div> */}
         <div className="text-center">
-  <div className="inline-flex flex-wrap items-center gap-2 md:gap-4 text-sage-500 font-serif italic text-base md:text-xl lg:text-2xl">
-    <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[0]}</span>
-    <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
-    <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[1]}</span>
-    <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
-    <span className="text-sage-800 font-bold w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[2]}</span>
-  </div>
-</div>
+          <div className="inline-flex flex-wrap items-center gap-2 md:gap-4 text-sage-500 font-serif italic text-base md:text-xl lg:text-2xl">
+            <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[0]}</span>
+            <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
+            <span className="w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[1]}</span>
+            <ArrowRight size={18} className="text-sage-300 md:text-sage-400" />
+            <span className="text-sage-800 font-bold w-full md:w-auto">{t.howItWorks.conclusion.split(' → ')[2]}</span>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -1247,7 +1258,8 @@ const CTA = () => {
 
             <div className="flex flex-col justify-center items-center gap-6">
               <button
-                onClick={openWaitlist}
+                // onClick={openWaitlist}
+                onClick={() => { trackEvent('cta_click', { source: 'hero' }); openWaitlist(); }}
                 className="w-full bg-warm-50 text-sage-900 px-10 py-6 rounded-[2rem] text-2xl font-bold hover:bg-white transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.3)] flex items-center justify-center gap-3 group"
               >
                 {t.cta.button}
@@ -1482,8 +1494,14 @@ const FloatingRewardPool = () => {
   const { rewardAmount, lang, openWaitlist } = useTranslation();
   const isDragging = useRef(false);
 
+  // const handleClick = () => {
+  //   if (isDragging.current) return;
+  //   openWaitlist();
+  // };
   const handleClick = () => {
     if (isDragging.current) return;
+    trackEvent('reward_pool_click');          // 奖金池专属
+    trackEvent('cta_click', { source: 'reward_pool_widget' });
     openWaitlist();
   };
 
@@ -1752,16 +1770,32 @@ export default function App() {
     setRewardAmount(prev => prev + 1.00);
   };
 
+  // const handleFlip = (index: number) => {
+  //   setFlippedStates(prev => {
+  //     if (prev[index]) return prev;
+  //     const next = [...prev];
+  //     next[index] = true;
+  //     return next;
+  //   });
+  // };
+
   const handleFlip = (index: number) => {
     setFlippedStates(prev => {
-      if (prev[index]) return prev;
+      if (prev[index]) return prev;           // 已翻过的不重复计数
+      trackEvent('plate_flip', { plate_index: index });
       const next = [...prev];
       next[index] = true;
       return next;
     });
   };
 
+  // const resetPlates = () => {
+  //   setFlippedStates(new Array(50).fill(false));
+  // };
+
   const resetPlates = () => {
+    const flippedCount = flippedStates.filter(Boolean).length;
+    trackEvent('health_reset', { flipped_count_before_reset: flippedCount });
     setFlippedStates(new Array(50).fill(false));
   };
 

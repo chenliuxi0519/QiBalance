@@ -30,8 +30,15 @@ function hasMysqlConfig(): boolean {
   return Boolean(process.env.MYSQL_HOST?.trim());
 }
 
+function defaultSqlitePath(): string {
+  if (process.env.SQLITE_PATH?.trim()) return process.env.SQLITE_PATH.trim();
+  // Vercel serverless: only /tmp is writable; data is ephemeral unless you use MySQL / external DB.
+  if (process.env.VERCEL) return '/tmp/leads.db';
+  return path.join(process.cwd(), 'data', 'leads.db');
+}
+
 function createSqliteAdapter(): DbAdapter {
-  const file = process.env.SQLITE_PATH || path.join(process.cwd(), 'data', 'leads.db');
+  const file = defaultSqlitePath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const sqlite = new Database(file);
 
@@ -193,7 +200,7 @@ async function bootstrap() {
   if (forceSqlite() || !hasMysqlConfig()) {
     db = createSqliteAdapter();
     await db.ensureSchema();
-    console.log('[db] SQLite → ./data/leads.db');
+    console.log('[db] SQLite →', defaultSqlitePath());
     return;
   }
 
@@ -211,17 +218,21 @@ async function bootstrap() {
     );
     db = createSqliteAdapter();
     await db.ensureSchema();
-    console.log('[db] SQLite → ./data/leads.db');
+    console.log('[db] SQLite →', defaultSqlitePath());
   }
 }
 
-bootstrap()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`API server listening on http://localhost:${PORT}`);
-    });
-  })
-  .catch((e) => {
-    console.error('Failed to start:', e);
-    process.exit(1);
+try {
+  await bootstrap();
+} catch (e) {
+  console.error('Failed to start:', e);
+  process.exit(1);
+}
+
+export default app;
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`API server listening on http://localhost:${PORT}`);
   });
+}

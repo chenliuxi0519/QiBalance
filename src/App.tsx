@@ -39,16 +39,8 @@ import {
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import {
-  saveLead,
-  signIn,
-  signOut,
-  onAuthStateChanged,
-  subscribeToLeads,
-  auth,
-  type User,
-  type Lead
-} from './firebase';
+import { saveLead, subscribeLeads, type Lead } from './api';
+import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext';
 
 import oneCN from './assets/1CN.mp4';
 import testCN from './assets/TestCN.mov';
@@ -1391,7 +1383,9 @@ const AdminLeadsView = ({ leads }: { leads: Lead[] }) => {
                   <td className="px-8 py-5 font-medium text-sage-900">{lead.email}</td>
                   <td className="px-8 py-5 text-sage-500 text-sm flex items-center gap-2">
                     <Calendar size={14} />
-                    {lead.createdAt?.toDate().toLocaleString() || 'Pending...'}
+                    {lead.createdAt
+                      ? new Date(lead.createdAt).toLocaleString()
+                      : 'Pending...'}
                   </td>
                 </tr>
               )) : (
@@ -1411,25 +1405,33 @@ const AdminLeadsView = ({ leads }: { leads: Lead[] }) => {
 
 const Footer = () => {
   const { t, lang } = useTranslation();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    return onAuthStateChanged(auth, (u) => setUser(u));
-  }, []);
+  const { token, email, isAdmin, login, logout } = useAdminAuth();
+  const [showLogin, setShowLogin] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loginBusy, setLoginBusy] = useState(false);
 
   const handleAdminAuth = async () => {
-    try {
-      if (user) {
-        await signOut();
-      } else {
-        await signIn();
-      }
-    } catch (error) {
-      alert(lang === 'zh' ? '管理员登录失败，请重试。' : 'Admin login failed. Please try again.');
+    if (isAdmin) {
+      logout();
+      return;
     }
+    setShowLogin(true);
   };
 
-  const isAdmin = user?.email === "chenliuxi0519@gmail.com";
+  const submitAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginBusy || !password) return;
+    setLoginBusy(true);
+    try {
+      await login(password);
+      setPassword('');
+      setShowLogin(false);
+    } catch {
+      alert(lang === 'zh' ? '管理员登录失败，请重试。' : 'Admin login failed. Please try again.');
+    } finally {
+      setLoginBusy(false);
+    }
+  };
 
   return (
     <footer className="bg-sage-900 text-warm-50 py-20">
@@ -1458,13 +1460,14 @@ const Footer = () => {
 
             {/* Admin Login Button */}
             <button
+              type="button"
               onClick={handleAdminAuth}
               className="mt-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sage-500 hover:text-sage-300 transition-colors w-fit"
             >
-              {user ? (
+              {isAdmin ? (
                 <>
                   <LogOut size={12} />
-                  {lang === 'zh' ? '退出管理' : 'Logout Admin'} ({user.email})
+                  {lang === 'zh' ? '退出管理' : 'Logout Admin'} ({email})
                 </>
               ) : (
                 <>
@@ -1473,6 +1476,56 @@ const Footer = () => {
                 </>
               )}
             </button>
+
+            <AnimatePresence>
+              {showLogin && !isAdmin && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+                  onClick={() => !loginBusy && setShowLogin(false)}
+                >
+                  <motion.form
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    onClick={(e) => e.stopPropagation()}
+                    onSubmit={submitAdminLogin}
+                    className="w-full max-w-sm rounded-2xl border border-sage-700 bg-sage-900 p-6 shadow-xl"
+                  >
+                    <p className="mb-4 text-sm font-medium text-warm-50">
+                      {lang === 'zh' ? '管理员密码' : 'Admin password'}
+                    </p>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mb-4 w-full rounded-lg border border-sage-600 bg-sage-800 px-3 py-2 text-sm text-warm-50 outline-none focus:border-sage-400"
+                      autoComplete="current-password"
+                      disabled={loginBusy}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowLogin(false)}
+                        className="rounded-lg px-3 py-1.5 text-xs text-sage-400 hover:text-warm-50"
+                        disabled={loginBusy}
+                      >
+                        {lang === 'zh' ? '取消' : 'Cancel'}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loginBusy || !password}
+                        className="rounded-lg bg-sage-600 px-3 py-1.5 text-xs font-medium text-warm-50 hover:bg-sage-500 disabled:opacity-50"
+                      >
+                        {lang === 'zh' ? '登录' : 'Sign in'}
+                      </button>
+                    </div>
+                  </motion.form>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -1732,30 +1785,22 @@ const HealthSidebar = () => {
   );
 };
 
-export default function App() {
+function AppMain() {
   const [lang, setLang] = useState<Language>('en');
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [rewardAmount, setRewardAmount] = useState(970.20);
   const [flippedStates, setFlippedStates] = useState(new Array(50).fill(false));
-  const [user, setUser] = useState<User | null>(null);
+  const { token, isAdmin } = useAdminAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const t = translations[lang];
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
     let unsubscribeLeads: (() => void) | undefined;
 
-    if (user?.email === "chenliuxi0519@gmail.com") {
-      unsubscribeLeads = subscribeToLeads((newLeads) => {
+    if (isAdmin && token) {
+      unsubscribeLeads = subscribeLeads((newLeads) => {
         setLeads(newLeads);
-      });
+      }, token);
     } else {
       setLeads([]);
     }
@@ -1763,7 +1808,7 @@ export default function App() {
     return () => {
       if (unsubscribeLeads) unsubscribeLeads();
     };
-  }, [user]);
+  }, [isAdmin, token]);
 
   const openWaitlist = () => setIsWaitlistOpen(true);
   const incrementReward = () => {
@@ -1799,8 +1844,6 @@ export default function App() {
     setFlippedStates(new Array(50).fill(false));
   };
 
-  const isAdmin = user?.email === "chenliuxi0519@gmail.com";
-
   return (
     <LanguageContext.Provider value={{
       lang,
@@ -1832,5 +1875,13 @@ export default function App() {
         <HealthSidebar />
       </div>
     </LanguageContext.Provider>
+  );
+}
+
+export default function App() {
+  return (
+    <AdminAuthProvider>
+      <AppMain />
+    </AdminAuthProvider>
   );
 }

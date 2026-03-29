@@ -77,6 +77,27 @@ const appVideos: Record<Language, { hero: string; steps: string[] }> = {
 
 type Language = 'en' | 'zh';
 
+/** SGD→CNY for zh display of pool / non-commitment amounts only (commitment is fixed in ¥). */
+const SGD_TO_CNY = 5.35;
+const MONTHLY_COMMITMENT_SGD = 9.9;
+/** Chinese UI: fixed monthly commitment, not tied to SGD spot rate. */
+const ZH_MONTHLY_COMMITMENT_YUAN = 25;
+
+function formatSgdAsMoney(lang: Language, amountSgd: number) {
+  if (lang === 'zh') {
+    const cny = amountSgd * SGD_TO_CNY;
+    return `¥${cny.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `SGD ${amountSgd.toLocaleString('en-SG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatMonthlyCommitmentStat(lang: Language) {
+  if (lang === 'zh') {
+    return `¥${ZH_MONTHLY_COMMITMENT_YUAN}`;
+  }
+  return formatSgdAsMoney(lang, MONTHLY_COMMITMENT_SGD);
+}
+
 const translations = {
   en: {
     nav: {
@@ -140,7 +161,7 @@ const translations = {
       ]
     },
     hero: {
-      badge: "Free if you're disciplined",
+      badge: "Eat with ease. Live with freedom.",
       title: "Turn “what you should eat” into “what you can eat right now.”",
       subtitle: "AI TCM Analysis + Nearby Recommendations. Helping you turn healthy eating into actionable choices.",
       ctaPrimary: "Free Trial",
@@ -149,7 +170,7 @@ const translations = {
       users: "professionals committed this month"
     },
     pain: {
-      title: "It's not that you don't want to be healthy, it's just hard to stick to it.",
+      title: "It's not about willpower—it's about consistency.",
       items: [
         {
           title: "I know but can't do",
@@ -164,7 +185,7 @@ const translations = {
           desc: "I feel bloated and uncomfortable after every meal, leading to my constant worry about my digestive health."
         }
       ],
-      summary: "Join now to stay consistent! Not only can you get your commitment fee back, but you can also share the rewards from those who didn't stick to it! Let's cheer each other on!"
+      summary: "Join now. Stay consistent.\nGet your deposit back—and earn from those who\u00A0don't."
     },
     betting: {
       title: "This is not a willpower-based health app",
@@ -185,10 +206,10 @@ const translations = {
         }
       ],
       milestones: [
-        { days: "7 Days", reward: "30% Cashback", desc: "Initial habit formation" },
-        { days: "14 Days", reward: "50% Cashback", desc: "Building consistency" },
-        { days: "21 Days", reward: "70% Cashback", desc: "Deepening the habit" },
-        { days: "28 Days", reward: "100% Cashback", desc: "Total transformation" }
+        { days: "7 Days", reward: "30%", desc: "Initial habit formation" },
+        { days: "14 Days", reward: "50%", desc: "Building consistency" },
+        { days: "21 Days", reward: "70%", desc: "Deepening the habit" },
+        { days: "28 Days", reward: "100%", desc: "Total transformation" }
       ],
       whyTitle: "Consistency Pays Off",
       whyDesc: "Don't lose, just gain. Your persistence is your best investment.",
@@ -199,37 +220,37 @@ const translations = {
       title: "How it Works",
       steps: [
         {
-          title: "TCM-inspired, \nbut designed for everyday use",
-          badge: "Understand Your Body",
+          title: "TCM-inspired, designed for everyday use",
+          badge: "Body Check",
           summary: "",
           desc: "Based on the classical TCM “Ten Questions” framework, we translate traditional diagnostic logic into simple, intuitive interactions. Quickly understand your body state—from Yin-Yang balance to Qi flow—through everyday sensations, with no medical knowledge required."
         },
         {
           title: "Personalized, not restrictive",
-          badge: "Fit Your Preferences",
+          badge: "Your Preferences",
           summary: "",
           desc: "We combine TCM principles with your personal food preferences to create plans that fit your taste. Making healthy eating easier, more enjoyable, and sustainable, so it becomes a daily habit rather than a burden."
         },
         {
           title: "Less thinking. \nMore healing",
-          badge: "Follow a Clear Plan",
+          badge: "Your Plan",
           summary: "",
           desc: "Based on your body constitution and preferences, we generate a structured 14-day TCM-based meal plan. Each meal comes with clear guidance and multiple options, so you never have to worry about what to eat."
         },
         {
           title: "Progress over perfection",
-          badge: "Track Without Effort",
+          badge: "Your Progress",
           summary: "",
           desc: "Simply upload a photo of your meal. Our AI analyzes ingredients and food properties to see how well they align with your wellness goals, allowing for informed adjustments instead of an all-or-nothing approach."
         },
         {
           title: "Adapt in Real Time",
-          badge: "Dynamic AI Adjustment",
+          badge: "Smart Adjustments",
           summary: "",
           desc: "Your plan dynamically adjusts based on your daily state and lifestyle changes. Through conversation with the AI assistant, you can optimize your health plan anytime to fit the reality of your busy life."
         }
       ],
-      conclusion: "Consistency → Cashback → Habit Formation",
+      conclusion: "Consistency → Rewards → Habit Formation",
       knowledgeBase: "Knowledge Base"
     },
     faq: {
@@ -338,7 +359,7 @@ const translations = {
       ]
     },
     hero: {
-      badge: "自律即免费",
+      badge: "轻养饮食，自在生活",
       title: "把“该吃什么”，变成“现在就能吃什么”",
       subtitle: "AI中医体质分析 + 周边餐厅推荐。\n帮你把健康饮食变成可执行选择。",
       ctaPrimary: "免费试用",
@@ -362,16 +383,16 @@ const translations = {
           desc: "每餐后我都感到胀气和不适，这让我不断担心自己的消化健康。"
         }
       ],
-      summary: "现在加入一起坚持，不仅可以拿回自己的契约金，还可以瓜分未能坚持的人的契约金！一起来加油吧！"
+      summary: "现在加入，一起坚持。\n拿回你的契约金——还能分到没坚持的奖励。"
     },
     betting: {
       title: "这不是一个靠意志力的健康App",
       subtitle: "你坚持，就能拿回你的钱。你不是在付费，而是在“和自己打赌”。",
-      summary: "契约金额：9.9 新币/月 —— 你不是在付费，而是在“和自己打赌”",
+      summary: "契约金额：25元/月 —— 你不是在付费，而是在“和自己打赌”",
       steps: [
         {
           title: "存入契约金",
-          desc: "存入每月 9.9 新币的契约金。这是你的“赌注”，确保你不会轻易放弃。"
+          desc: "存入每月 25 元的契约金。这是你的“赌注”，确保你不会轻易放弃。"
         },
         {
           title: "每日打卡",
@@ -644,18 +665,19 @@ const Navbar = () => {
 
   return (
     <nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
-      isScrolled ? "bg-warm-50/80 backdrop-blur-md border-b border-sage-100 py-3" : "bg-transparent"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-3 sm:px-6 py-3 sm:py-4 max-w-[100vw] overflow-x-clip",
+      isScrolled ? "bg-warm-50/80 backdrop-blur-md border-b border-sage-100 py-2.5 sm:py-3" : "bg-transparent"
     )}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="text-sage-600 transition-transform hover:scale-110 cursor-pointer">
-            <Leaf size={32} fill="currentColor" />
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+          <div className="text-sage-600 transition-transform hover:scale-110 cursor-pointer shrink-0">
+            <Leaf className="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-serif font-bold tracking-tighter text-sage-900 leading-none">炁 Qì</span>
-            <span className="text-[10px] font-bold text-sage-500 uppercase tracking-[0.2em] leading-none mt-1">Balance</span>
+          <div className="hidden min-[380px]:flex flex-col min-w-0">
+            <span className="text-lg sm:text-2xl font-serif font-bold tracking-tighter text-sage-900 leading-none truncate">炁 Qì</span>
+            <span className="text-[9px] sm:text-[10px] font-bold text-sage-500 uppercase tracking-[0.2em] leading-none mt-0.5 sm:mt-1">Balance</span>
           </div>
+          <span className="min-[380px]:hidden text-base font-serif font-bold tracking-tighter text-sage-900 leading-none">炁</span>
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-sage-700">
@@ -664,18 +686,18 @@ const Navbar = () => {
           <a href="#faq" className="hover:text-sage-900 transition-colors">{t.nav.faq}</a>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
           <button
             onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
-            className="p-2 rounded-full hover:bg-sage-100 transition-colors text-sage-600 flex items-center gap-2"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-sage-100 transition-colors text-sage-600 flex items-center gap-1 sm:gap-2"
           >
-            <Languages size={18} />
-            <span className="text-xs font-bold uppercase tracking-widest">{lang === 'en' ? '中文' : 'EN'}</span>
+            <Languages className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest">{lang === 'en' ? '中文' : 'EN'}</span>
           </button>
           <button
             // onClick={openWaitlist}
             onClick={() => { trackEvent('cta_click', { source: 'navbar' }); openWaitlist(); }}
-            className="bg-sage-600 text-warm-50 px-6 py-2.5 rounded-full text-sm font-medium hover:bg-sage-700 transition-all shadow-sm hover:shadow-md"
+            className="bg-sage-600 text-warm-50 px-3 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium hover:bg-sage-700 transition-all shadow-sm hover:shadow-md whitespace-nowrap"
           >
             {t.nav.startTrial}
           </button>
@@ -700,48 +722,53 @@ const Hero = () => {
         </svg>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center min-w-0">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="min-w-0"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-100 text-sage-700 text-xs font-semibold uppercase tracking-wider mb-6">
-              <Leaf size={14} fill="currentColor" />
-              <span>炁 Qì • {t.hero.badge}</span>
+            <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 max-w-full px-2.5 sm:px-3 py-1 rounded-full bg-sage-100 text-sage-700 text-[10px] sm:text-xs font-semibold tracking-wide mb-6">
+              <Leaf className="w-3.5 h-3.5 sm:w-[14px] sm:h-[14px] shrink-0" fill="currentColor" />
+              <span className="break-words">炁 Qì • {t.hero.badge}</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold leading-[1.1] text-sage-900 mb-8 tracking-tighter">
+            <h1 className="text-[clamp(1.75rem,5.5vw+0.35rem,4.5rem)] md:text-5xl lg:text-7xl font-serif font-bold leading-[1.12] text-sage-900 mb-6 sm:mb-8 tracking-tighter break-words">
               {lang === 'en' ? (
                 <>
-                  Turn <span className="text-sage-400 font-medium">“what you should eat”</span> <br className="hidden md:block" />
-                  into <span className="text-emerald-600">“what you can eat right now.”</span>
+                  <span className="whitespace-normal md:whitespace-nowrap">
+                    Turn <span className="text-sage-400 font-medium">“what you should eat”</span>
+                  </span>{' '}
+                  <br className="hidden md:block" />
+                  into <span className="text-emerald-600 break-words md:whitespace-normal">“what you can eat right now.”</span>
                 </>
               ) : (
                 <>
                   把 <span className="text-sage-400 font-medium">“该吃什么”</span> <br className="hidden md:block" />
-                  变成 <span className="text-emerald-600">“现在就能吃什么”</span>
+                  变成{' '}
+                  <span className="text-emerald-600 whitespace-normal md:whitespace-nowrap">“现在就能吃什么”</span>
                 </>
               )}
             </h1>
-            <p className="text-lg text-sage-600 mb-8 max-w-lg leading-relaxed font-sans whitespace-pre-line">
+            <p className="text-base sm:text-lg text-sage-600 mb-6 sm:mb-8 max-w-lg leading-relaxed font-sans whitespace-pre-line break-words">
               {t.hero.subtitle}
             </p>
             <div className="flex flex-col gap-6">
               <button
                 // onClick={openWaitlist}
                 onClick={() => { trackEvent('cta_click', { source: 'hero' }); openWaitlist(); }}
-                className="bg-sage-600 text-warm-50 px-12 py-5 rounded-full text-xl font-medium hover:bg-sage-700 transition-all shadow-[0_20px_50px_rgba(90,117,90,0.3)] hover:shadow-[0_20px_60px_rgba(90,117,90,0.4)] flex items-center justify-center gap-3 w-fit group"
+                className="bg-sage-600 text-warm-50 px-8 py-4 sm:px-12 sm:py-5 rounded-full text-lg sm:text-xl font-medium hover:bg-sage-700 transition-all shadow-[0_20px_50px_rgba(90,117,90,0.3)] hover:shadow-[0_20px_60px_rgba(90,117,90,0.4)] flex items-center justify-center gap-3 w-full sm:w-fit group"
               >
                 {t.hero.ctaPrimary}
                 <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
               </button>
-              <p className="text-sm text-sage-500 opacity-80 pl-4 border-l-2 border-sage-200">
+              <p className="text-xs sm:text-sm text-sage-500 opacity-80 pl-3 sm:pl-4 border-l-2 border-sage-200 break-words">
                 {t.hero.ctaIncentive}
               </p>
             </div>
 
-            <div className="mt-12 flex items-center gap-6">
+            <div className="mt-8 sm:mt-12 flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map((i) => (
                   <img
@@ -753,7 +780,7 @@ const Hero = () => {
                   />
                 ))}
               </div>
-              <div className="text-sm text-sage-500">
+              <div className="text-xs sm:text-sm text-sage-500 min-w-0 break-words">
                 <span className="font-bold text-sage-900">99+</span> {t.hero.users}
               </div>
             </div>
@@ -763,7 +790,7 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="relative min-w-0 w-full overflow-x-clip lg:overflow-visible"
           >
             {/* <div className="relative z-10 bg-white p-4 rounded-[2.5rem] shadow-2xl border border-sage-100">
               {lang === 'zh' ? (
@@ -783,16 +810,16 @@ const Hero = () => {
                   referrerPolicy="no-referrer"
                 />
               )} */}
-            <div className="relative z-10 flex justify-center">
+            <div className="relative z-10 flex justify-center w-full min-w-0 px-0 sm:px-2">
               <video
                 src={appVideos[lang].hero}
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="rounded-[2rem] h-[720px] w-auto max-w-full object-contain"
+                className="rounded-2xl sm:rounded-[2rem] w-full max-w-[min(100%,22rem)] md:max-w-none h-auto max-h-[min(58vh,520px)] md:max-h-[720px] md:h-[720px] md:w-auto object-contain mx-auto"
               />
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-sage-50 max-w-[200px]">
+              <div className="absolute z-20 bottom-2 left-2 sm:-bottom-6 sm:-left-6 bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-xl border border-sage-50 w-[min(200px,calc(100vw-2.5rem))] max-w-[200px] sm:max-w-[200px] sm:w-auto">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
                     <TrendingUp size={18} />
@@ -811,18 +838,23 @@ const Hero = () => {
 };
 
 const PainPoints = () => {
-  const { t, lang } = useTranslation();
+  const { t } = useTranslation();
+  const summaryNl = t.pain.summary.indexOf('\n');
+  const painSummaryLine1 = summaryNl === -1 ? t.pain.summary : t.pain.summary.slice(0, summaryNl);
+  const painSummaryLine2 =
+    summaryNl === -1 ? '' : t.pain.summary.slice(summaryNl + 1).replace(/\n/g, ' ').trim();
+
   return (
-    <section className="py-16 bg-warm-50 overflow-hidden border-t border-sage-100/50">
+    <section className="py-8 bg-warm-50 overflow-hidden border-t border-sage-100/50 md:py-10">
       <div className="w-full px-6 md:px-12">
-        <div className="text-center mb-24">
-          <h2 className="text-4xl md:text-6xl font-serif font-bold text-sage-900 leading-[1.1] tracking-tight max-w-4xl mx-auto">
+        <div className="mb-12 text-center md:mb-12">
+          <h2 className="mx-auto max-w-4xl text-3xl font-serif font-medium leading-[1.1] tracking-tight text-sage-900 md:text-4xl lg:text-5xl">
             {t.pain.title}
           </h2>
-          <div className="mt-8 w-16 h-1.5 bg-sage-200 mx-auto rounded-full" />
+          <div className="mx-auto mt-4 h-1.5 w-16 rounded-full bg-sage-200 md:mt-8" />
         </div>
 
-        <div className="space-y-3 relative max-w-5xl mx-auto mb-16">
+        <div className="relative mx-auto mb-8 max-w-5xl space-y-3 md:mb-8">
           {t.pain.items.map((item, i) => (
             <motion.div
               key={i}
@@ -835,45 +867,31 @@ const PainPoints = () => {
                 i % 2 === 0 ? "justify-start" : "justify-end"
               )}
             >
-              <div className={cn(
-                "relative max-w-[95%] md:max-w-[620px] p-3 md:p-4 rounded-[1.25rem] shadow-sm border transition-all hover:shadow-md",
-                i % 2 === 0
-                  ? "bg-sage-600 text-warm-50 border-sage-500 rounded-tl-none"
-                  : "bg-white border-sage-100 rounded-tr-none"
-              )}>
-                {/* Bubble Tail */}
-                <div className={cn(
-                  "absolute top-0 w-5 h-5",
+              <div
+                className={cn(
+                  'relative max-w-[95%] overflow-visible rounded-[1.25rem] border p-3 shadow-sm transition-all hover:shadow-md md:max-w-[620px] md:p-4',
                   i % 2 === 0
-                    ? "-left-5 text-sage-600"
-                    : "-right-5 text-white"
-                )}>
-                  <svg viewBox="0 0 16 16" fill="currentColor" className="w-full h-full">
-                    {i % 2 === 0 ? (
-                      <path d="M16 0 L0 0 L16 16 Z" />
-                    ) : (
-                      <path d="M0 0 L16 0 L0 16 Z" />
-                    )}
-                  </svg>
-                </div>
-
-                <div className="flex items-center gap-4 md:gap-5">
+                    ? 'border-sage-500 bg-sage-600 text-warm-50 before:pointer-events-none before:absolute before:left-[-5px] before:top-1/2 before:z-0 before:h-2.5 before:w-2.5 before:-translate-y-1/2 before:rotate-45 before:border-b before:border-l before:border-sage-500 before:bg-sage-600 before:content-[""]'
+                    : 'border-sage-100 bg-white text-sage-900 after:pointer-events-none after:absolute after:right-[-5px] after:top-1/2 after:z-0 after:h-2.5 after:w-2.5 after:-translate-y-1/2 after:rotate-45 after:border-r after:border-t after:border-sage-100 after:bg-white after:content-[""]'
+                )}
+              >
+                <div className="relative z-[1] flex items-center gap-4 md:gap-5">
                   <div className={cn(
-                    "w-9 h-9 rounded-lg flex items-center justify-center shrink-0 shadow-inner",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-inner",
                     i % 2 === 0 ? "bg-sage-500/30 text-warm-50" : "bg-sage-50 text-sage-600"
                   )}>
                     {i === 0 && <Brain size={18} />}
                     {i === 1 && <ShoppingBag size={18} />}
                     {i === 2 && <HeartPulse size={18} />}
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <h3 className={cn(
-                      "text-lg md:text-xl font-serif font-bold mb-1 tracking-tight",
-                      i % 2 === 0 ? "text-warm-50" : "text-sage-900"
+                      'mb-1 text-sm font-medium leading-relaxed tracking-normal md:text-base',
+                      i % 2 === 0 ? 'text-warm-50' : 'text-sage-900'
                     )}>{item.title}</h3>
                     <p className={cn(
-                      "text-sm md:text-base leading-relaxed opacity-90 font-sans",
-                      i % 2 === 0 ? "text-warm-50/90" : "text-sage-600"
+                      'text-sm font-sans font-normal leading-relaxed md:text-base',
+                      i % 2 === 0 ? 'text-warm-50/90' : 'text-sage-600'
                     )}>{item.desc}</p>
                   </div>
                 </div>
@@ -888,22 +906,15 @@ const PainPoints = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto mt-32 text-center"
+          className="mx-auto mt-16 w-full max-w-none overflow-x-auto overflow-y-visible px-1 text-center md:mt-16"
         >
-          <div className="h-px w-24 bg-sage-200 mx-auto mb-12" />
-          <h3 className="text-3xl md:text-5xl font-serif font-bold text-sage-900 leading-tight mb-10 tracking-tight max-w-9xl mx-auto">
-            {t.pain.summary}
+          <div className="mx-auto mb-6 h-px w-24 bg-sage-200 md:mb-8" />
+          <h3 className="inline-flex min-w-min max-w-none flex-col items-center text-3xl font-serif font-medium leading-tight tracking-tight text-sage-900 md:text-4xl lg:text-5xl">
+            <span className="block">{painSummaryLine1}</span>
+            {painSummaryLine2 ? (
+              <span className="mt-5 block whitespace-nowrap">{painSummaryLine2}</span>
+            ) : null}
           </h3>
-          <button
-            onClick={() => {
-              const el = document.getElementById('cta');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="inline-flex items-center gap-2 text-sage-600 font-bold uppercase tracking-[0.3em] text-xs hover:text-sage-900 transition-colors group"
-          >
-            {lang === 'zh' ? '立即开启健康之旅' : 'START YOUR JOURNEY'}
-            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-          </button>
         </motion.div>
       </div>
     </section>
@@ -916,7 +927,7 @@ const BettingModel = () => {
     <section id="betting" className="py-20 bg-sage-900 text-warm-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-6xl mx-auto mb-16">
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif font-medium mb-6 w-full md:w-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-medium mb-6 w-full md:w-auto">
             {t.betting.title}
           </h2>
           <p className="text-lg opacity-80 leading-relaxed mb-4">
@@ -927,26 +938,26 @@ const BettingModel = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 mb-10">
           {t.betting.steps.map((item, i) => (
             <motion.div
               key={i}
               whileHover={{ y: -8, backgroundColor: 'rgba(44, 71, 60, 0.6)' }}
-              className="bg-sage-800/40 border border-sage-700/50 p-10 rounded-[2.5rem] transition-colors duration-300 backdrop-blur-sm shadow-xl"
+              className="bg-sage-800/40 border border-sage-700/50 p-8 rounded-[2.5rem] transition-colors duration-300 backdrop-blur-sm shadow-xl"
             >
-              <div className="mb-8 w-14 h-14 bg-sage-700/50 rounded-2xl flex items-center justify-center shadow-inner">
+              <div className="mb-[calc(2rem*2/3)] w-14 h-14 bg-sage-700/50 rounded-2xl flex items-center justify-center shadow-inner">
                 {i === 0 && <Wallet className="text-emerald-400" size={28} />}
                 {i === 1 && <CheckCircle2 className="text-emerald-400" size={28} />}
                 {i === 2 && <Award className="text-emerald-400" size={28} />}
               </div>
-              <h3 className="text-2xl font-serif font-bold mb-4 tracking-tight">{item.title}</h3>
+              <h3 className="text-2xl font-serif font-bold mb-[calc(1rem*2/3)] tracking-tight">{item.title}</h3>
               <p className="text-base opacity-70 leading-relaxed font-light">{item.desc}</p>
             </motion.div>
           ))}
         </div>
 
-        {/* Cashback Milestones */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+        {/* Milestone cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
           {t.betting.milestones.map((milestone, i) => (
             <motion.div
               key={i}
@@ -956,31 +967,31 @@ const BettingModel = () => {
               viewport={{ once: true }}
               className="bg-white/5 border border-white/10 p-4 rounded-[2rem] text-center backdrop-blur-sm hover:bg-white/10 transition-colors group"
             >
-              <div className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-3 opacity-80 group-hover:opacity-100 transition-opacity">{milestone.days}</div>
-              <div className="text-3xl font-serif font-bold mb-2 tracking-tighter">{milestone.reward}</div>
+              <div className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-2 opacity-80 group-hover:opacity-100 transition-opacity">{milestone.days}</div>
+              <div className="text-3xl font-sans font-bold tabular-nums tracking-tight mb-[calc(0.5rem*2/3)]">{milestone.reward}</div>
               <div className="text-[11px] opacity-40 group-hover:opacity-60 transition-opacity font-medium">{milestone.desc}</div>
             </motion.div>
           ))}
         </div>
 
-        <div className="p-10 bg-sage-800/60 rounded-[3rem] border border-sage-700/50 flex flex-col md:flex-row items-center gap-12 backdrop-blur-md shadow-2xl">
+        <div className="p-8 bg-sage-800/60 rounded-[3rem] border border-sage-700/50 flex flex-col md:flex-row items-center gap-8 backdrop-blur-md shadow-2xl">
           <div className="flex-1">
-            <h4 className="text-3xl font-serif font-bold mb-6 tracking-tight">{t.betting.whyTitle}</h4>
+            <h4 className="text-3xl font-serif font-bold mb-4 tracking-tight">{t.betting.whyTitle}</h4>
             <p className="text-base opacity-70 leading-relaxed font-light max-w-xl">
               {t.betting.whyDesc}
             </p>
           </div>
           <div className="flex gap-10 items-center">
             <div className="text-center">
-              <div className="text-4xl font-serif font-bold text-emerald-400 tracking-tighter">92%</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] opacity-40 mt-2 font-bold">{t.betting.completionRate}</div>
+              <div className="text-4xl font-sans font-bold tabular-nums text-emerald-400 tracking-tight">92%</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] opacity-40 mt-[calc(0.5rem*2/3)] font-bold">{t.betting.completionRate}</div>
             </div>
             <div className="w-px h-16 bg-sage-700/50"></div>
             <div className="text-center">
-              <div className="text-4xl font-serif font-bold text-emerald-400 tracking-tighter">
-                {lang === 'zh' ? '9.9 新币' : 'SGD 9.90'}
+              <div className="text-4xl font-sans font-bold tabular-nums text-emerald-400 tracking-tight">
+                {formatMonthlyCommitmentStat(lang)}
               </div>
-              <div className="text-[10px] uppercase tracking-[0.2em] opacity-40 mt-2 font-bold">{t.betting.avgReward}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] opacity-40 mt-[calc(0.5rem*2/3)] font-bold">{t.betting.avgReward}</div>
             </div>
           </div>
         </div>
@@ -989,19 +1000,16 @@ const BettingModel = () => {
   );
 };
 
-const VideoCard = ({
-  step,
-  index,
-  hoveredIndex,
-  setHoveredIndex,
-  videoSrc
-}: {
-  step: any;
-  index: number;
-  hoveredIndex: number | null;
-  setHoveredIndex: (i: number | null) => void;
-  videoSrc: string;
-}) => {
+const VideoCard = React.forwardRef<
+  HTMLDivElement,
+  {
+    step: any;
+    index: number;
+    hoveredIndex: number | null;
+    setHoveredIndex: (i: number | null) => void;
+    videoSrc: string;
+  }
+>(({ step, index, hoveredIndex, setHoveredIndex, videoSrc }, ref) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   React.useEffect(() => {
@@ -1015,29 +1023,38 @@ const VideoCard = ({
 
   return (
     <motion.div
+      ref={ref}
       onMouseEnter={() => setHoveredIndex(index)}
       onTouchStart={() => setHoveredIndex(index)}
-      className="flex-shrink-0 w-[400px] snap-center"
+      className="w-[270px] flex-shrink-0 snap-center sm:w-[276px]"
     >
       <div className={cn(
-        "bg-white rounded-[2.5rem] overflow-hidden shadow-sm border transition-all duration-500 flex flex-col h-full group",
+        "relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition-all duration-500 sm:rounded-[2rem]",
         hoveredIndex === index ? "border-sage-600 shadow-xl ring-2 ring-sage-600/10" : "border-sage-100"
       )}>
-        {/* Video Section - 380x675 (9:16) */}
-        <div className="w-[400px] h-[720px] overflow-hidden relative bg-sage-900 flex items-center justify-center">
+        <div className="absolute left-3 top-3 z-20 sm:left-3.5 sm:top-3.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-sm font-bold text-sage-900 shadow-sm backdrop-blur-sm sm:h-9 sm:w-9 sm:text-base">
+            {index + 1}
+          </div>
+        </div>
+
+        {/* Sage block: pill title + video share one deep green background */}
+        <div className="bg-sage-900">
+          <div className="flex flex-col items-center px-4 pb-1 pt-4 text-center sm:px-5 sm:pb-1 sm:pt-4">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-warm-50/95 backdrop-blur-sm sm:px-4 sm:py-2 sm:text-sm">
+              {step.badge}
+            </div>
+          </div>
+
+          <div className="relative box-border flex h-[486px] w-[270px] items-center justify-center overflow-hidden p-4 sm:h-[496px] sm:w-[276px] sm:p-5">
           <video
             ref={videoRef}
             src={videoSrc}
             loop
             muted
             playsInline
-            className="h-full max-h-[680px] w-auto max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+            className="max-h-full max-w-full h-auto w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
           />
-          <div className="absolute top-6 left-6">
-            <div className="w-10 h-10 bg-white/90 backdrop-blur-sm text-sage-900 rounded-full flex items-center justify-center font-bold shadow-sm">
-              {index + 1}
-            </div>
-          </div>
           {/* Overlay for play hint */}
           <AnimatePresence>
             {hoveredIndex !== index && (
@@ -1053,22 +1070,20 @@ const VideoCard = ({
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </div>
 
-        {/* Content Area - Moved back to Bottom */}
-        <div className="p-8 flex-1 flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-sage-100 text-sage-700 text-lg font-bold uppercase tracking-widest mb-4 w-fit">
-            {step.badge}
-          </div>
-
-          <h3 className="text-2xl md:text-3xl font-serif font-bold text-sage-900 leading-tight whitespace-pre-line">
+        <div className="flex flex-1 flex-col items-center p-4 pt-3 text-center sm:p-5 sm:pt-4">
+          <h3 className="text-sm font-serif font-medium leading-tight text-sage-900 whitespace-pre-line sm:text-base md:text-lg">
             {step.title}
           </h3>
         </div>
       </div>
     </motion.div>
   );
-};
+});
+
+VideoCard.displayName = 'VideoCard';
 
 const HowItWorks = () => {
   const { t, lang } = useTranslation();
@@ -1109,71 +1124,48 @@ const HowItWorks = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-24 bg-warm-50 overflow-hidden">
+    <section id="how-it-works" className="py-8 md:py-12 lg:py-14 bg-warm-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6" ref={containerRef}>
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif font-medium text-sage-900 mb-4">{t.howItWorks.title}</h2>
+        <div className="mx-auto mb-4 max-w-3xl text-center md:mb-5">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-medium text-sage-900 mb-2 md:mb-3">{t.howItWorks.title}</h2>
           {/* Drag Hint */}
           <div className="flex justify-center gap-4">
             <div className="flex items-center gap-2 text-sage-400 text-[10px] font-bold uppercase tracking-widest">
-              <ArrowRight size={12} className="rotate-180" />
+              <ArrowRight size={12} className="rotate-180 shrink-0" />
               <span>{lang === 'zh' ? '拖拽或触控板横向滑动探索 5 个步骤' : 'Drag or swipe on trackpad to explore all 5 steps'}</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={12} className="shrink-0" />
             </div>
           </div>
         </div>
 
-        {/* Expanded Content Section - Moved Above */}
-        <div className="relative min-h-[120px] mb-16">
+        <div className="relative mb-4 min-h-[3.5rem] md:mb-5">
           <AnimatePresence mode="wait">
             {hoveredIndex !== null && (
               <motion.div
                 key={hoveredIndex}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="w-full bg-white rounded-[1.5rem] p-6 shadow-md border border-sage-100 relative"
+                exit={{ opacity: 0, y: -8 }}
+                className="w-full text-center"
               >
-                {/* Visual Pointer/Caret - Pointing Down */}
-                <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white border-b border-r border-sage-100 rotate-45 z-10" />
-
-                <div className="max-w-2xl mx-auto text-center">
-                  <div className="flex flex-col items-center gap-4 mb-6">
-                    <div className="w-10 h-10 bg-sage-600 text-warm-50 rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
-                      {hoveredIndex + 1}
-                    </div>
-                    <h4 className="text-xl md:text-2xl font-serif font-bold text-sage-900 whitespace-pre-line">
-                      {t.howItWorks.steps[hoveredIndex].title}
-                    </h4>
-                  </div>
-
-                  <div className="mt-6">
-                    <p className="text-base md:text-lg text-sage-700 leading-relaxed max-w-2xl mx-auto">
-                      {t.howItWorks.steps[hoveredIndex].desc}
-                    </p>
-                  </div>
-                </div>
+                <p className="mx-auto max-w-5xl text-sm leading-relaxed text-sage-700 md:text-base">
+                  {t.howItWorks.steps[hoveredIndex].desc}
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <div className="relative mb-12 cursor-grab active:cursor-grabbing" onWheel={handleWheel}>
-          {/* Draggable Container */}
-          {/* <motion.div
-            ref={scrollRef}
-            style={{ x }}
-            drag="x"
-            dragConstraints={dragConstraints}
-            className="flex gap-6 pb-12 no-scrollbar"
-          > */}
+        <div className="relative mb-6 cursor-grab active:cursor-grabbing md:mb-8" onWheel={handleWheel}>
           <motion.div
             ref={scrollRef}
             style={{ x }}
             drag="x"
             dragConstraints={dragConstraints}
-            onDragEnd={() => trackEvent('video_section_drag')}   // ← 加这行
-            className="flex gap-6 pb-12 no-scrollbar"
+            onDragEnd={() => {
+              trackEvent('video_section_drag');
+            }}
+            className="flex gap-8 pb-5 no-scrollbar md:gap-10 md:pb-6"
           >
             {t.howItWorks.steps.map((step, i) => (
               <VideoCard
@@ -1275,30 +1267,6 @@ const CTA = () => {
               </div>
             </div>
           </div>
-
-          {/* Mission & Vision */}
-          <div className="flex flex-col gap-8 pt-12 border-t border-white/10">
-            <div className="text-center">
-              <h4 className="text-xs font-bold uppercase tracking-[0.4em] text-sage-300 mb-4 opacity-80 flex items-center justify-center gap-4">
-                <span className="w-12 h-px bg-sage-500/30" />
-                {t.cta.missionTitle}
-                <span className="w-12 h-px bg-sage-500/30" />
-              </h4>
-              <p className="text-xl md:text-2xl font-serif italic text-warm-50 leading-relaxed max-w-2xl mx-auto">
-                "{t.cta.missionDesc}"
-              </p>
-            </div>
-            <div className="text-center">
-              <h4 className="text-xs font-bold uppercase tracking-[0.4em] text-sage-300 mb-4 opacity-80 flex items-center justify-center gap-4">
-                <span className="w-12 h-px bg-sage-500/30" />
-                {t.cta.visionTitle}
-                <span className="w-12 h-px bg-sage-500/30" />
-              </h4>
-              <p className="text-xl md:text-2xl font-serif italic text-warm-50 leading-relaxed max-w-2xl mx-auto">
-                "{t.cta.visionDesc}"
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -1312,7 +1280,7 @@ const FAQ = () => {
   return (
     <section id="faq" className="py-24 bg-warm-50">
       <div className="max-w-3xl mx-auto px-6">
-        <h2 className="text-4xl font-serif font-medium text-sage-900 mb-12 text-center">{t.faq.title}</h2>
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-medium text-sage-900 mb-12 text-center">{t.faq.title}</h2>
         <div className="space-y-4">
           {t.faq.questions.map((faq, i) => (
             <div key={i} className="border-b border-sage-100">
@@ -1567,13 +1535,13 @@ const FloatingRewardPool = () => {
       whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
       onDragStart={() => { isDragging.current = true; }}
       onDragEnd={() => { setTimeout(() => { isDragging.current = false; }, 0); }}
-      className="fixed top-24 right-6 z-[60] group cursor-pointer"
+      className="fixed top-[4.25rem] right-2 sm:top-24 sm:right-6 z-[60] group cursor-pointer w-[min(calc(100vw-1rem),220px)] sm:w-auto max-w-[calc(100vw-1rem)] origin-top-right"
       onClick={handleClick}
     >
       {/* Background Glow Pulse */}
       <div className="absolute inset-0 bg-amber-400/10 blur-3xl rounded-full animate-pulse group-hover:bg-amber-400/20 transition-colors" />
 
-      <div className="relative bg-sage-900 border border-sage-700 p-3 rounded-[1.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2 hover:border-sage-600 transition-all overflow-hidden min-w-[180px]">
+      <div className="relative bg-sage-900 border border-sage-700 p-2.5 sm:p-3 rounded-[1.25rem] sm:rounded-[1.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.3)] flex flex-col items-center gap-1.5 sm:gap-2 hover:border-sage-600 transition-all overflow-hidden w-full min-w-0 sm:min-w-[180px]">
         {/* Shimmer Effect */}
         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
 
@@ -1588,8 +1556,8 @@ const FloatingRewardPool = () => {
             <div className="text-[9px] font-bold text-sage-400 uppercase tracking-widest mb-0.5">
               {lang === 'zh' ? '预约奖金池' : 'Reward Pool'}
             </div>
-            <div className="text-xl font-serif font-bold text-warm-50 tabular-nums leading-none tracking-tight">
-              SGD {rewardAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <div className="text-xl font-sans font-bold tabular-nums text-warm-50 leading-none tracking-tight">
+              {formatSgdAsMoney(lang, rewardAmount)}
             </div>
           </div>
         </div>
@@ -1764,7 +1732,7 @@ const HealthSidebar = () => {
             key={flippedCount}
             initial={{ scale: 1.2, color: "#10b981" }}
             animate={{ scale: 1, color: "#1c1c1c" }}
-            className="text-sm font-serif font-bold leading-none tabular-nums sm:text-base"
+            className="text-sm font-sans font-bold leading-none tabular-nums sm:text-base"
           >
             {Math.round(healthPercentage)}
           </motion.span>
@@ -1856,9 +1824,9 @@ function AppMain() {
       handleFlip,
       resetPlates
     }}>
-      <div className="min-h-screen">
+      <div className="min-h-screen max-w-[100vw] overflow-x-clip">
         <Navbar />
-        <main>
+        <main className="min-w-0">
           <Hero />
           <PlateDivider startIndex={0} />
           <HowItWorks />
